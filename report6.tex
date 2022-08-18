@@ -1,0 +1,834 @@
+\documentclass{article}
+\usepackage{titlesec}
+\usepackage{titling}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xepersian}
+
+\renewcommand{\labelitemi}{$\circ$}
+\renewcommand{\labelitemii}{$\circ$}
+\renewcommand{\labelitemiii}{$\circ$}
+\renewcommand{\labelitemiv}{$\circ$}
+
+
+
+\setlatintextfont[Scale=0.85]{Noto Sans}
+
+\settextfont{B Nazanin}
+\title{\includegraphics[width=1in,height=1in]{logo.png}
+	\\[1cm]
+	چالش ششم: \lr{Indoor Location \& Navigation} }
+\author{فراهم‌آورنده: سینا حیدری}
+\date{زمستان ۹۹}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\footnotesize,
+	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=5pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\titlespacing*{\section}{0pt}{50pt}{40pt}
+\begin{document}
+	\maketitle
+	\newpage
+	\ \\
+	برای مشاهده‌ی جزئیات این چالش در کگل به لینک زیر مراجعه کنید.\\
+\begin{flushleft}
+	\href{https://www.kaggle.com/c/indoor-location-navigation/overview}{\lr{https://www.kaggle.com/c/indoor-location-navigation/overview}}
+\end{flushleft}
+\section{در مورد این چالش}
+گوشی‌های هوشمند شما در هر جایی با شما هستند-چه در حال رانندگی به‌ سمت فروشگاه هستید یا در فروشگاه در حال خرید باشید. با اجازه شما، نرم‌افزارها می‌توانند از مکان‌تان برای فراهم آوردن اطلاعات استفاده کنند. شما شاید جهت‌های رانندگی را گوشی هوشمندتان دریافت کنید، یا از آن برای یافتن فروشگاه مشخصی استفاده کنید و همچنین امکان دیدن تبلیغ‌های نزدیک‌تان را هم داشته باشید. این ویژگی‌های کاربردی برای \lr{\textbf{GPS}}\footnote{\lr{Global Positioning System}} فعال گشته، اما برای تشخیص با دقت بالا، نیاز به بودن کاربر در فضای باز دارند. با این حال، دفعات زیادی وجود دارد که در ساختمان‌های بزرگی همچون؛ مراکز خرید و مراکز رویدادها باشید. موقعیت‌یابی داخل ساختمان، بر پایه حس‌گرهای عمومی و اجازه‌ کاربر، یک تجربه خوب مبنی بر موقعیت-حتی اگر در فضای باز نباشیم-را فراهم می‌آورد.\\
+راهکارهای موقعیت‌یابی کنون دقت پایینی دارند، به خصوص درساختمان‌های چند طبقه یا وقتی مجموعه‌داده محدود است. علاوه بر این، \lr{GPS} برای دوره قبل از گوشی‌های هوشمند ساخته شد. کاربرد‌های امروزی اغلب نیاز به \lr{\textbf{granuality}} بیشتری دارند که در داخل ساختمان معمولا وجود ندارد.\\
+در این رقابت، وظیفه شما پیشبینی موقعیت داخلی یک گوشی هوشمند بر اساس داده بلادرنگ سنسورها است. این داده توسط شرکت فناوری موقعیت‌یابی: \lr{\textbf{XYZ10}}-که با \lr{Microsoft Research} شراکت دارد-فراهم آمده است. شما دستگاه‌ها را با استفاده از داده فعال بومی‌سازی شده، که با هم‌دستی کاربران جمع شده مکان‌یابی می‌کنید. برخلاف روش‌های بومی‌سازی غیر فعال (برای نمونه؛ رادار و دوربین)، داده فراهم شده برای این رقابت نیازمند اجازه صریح کاربر است.\\
+اگر موفق باشید، شما به تحقیقی با حوضه‌های کاربردی‌ پهناور مانند؛ صنعت تولید، خرده‌فروشی و دستگاه‌های خودمختار کمک کرده‌اید. با مکان‌یابی دقیق‌تر، نرم‌افزارهای بر پایه موقعیت کنونی، حتی بیشتر بهبود پیدا می‌کنند.
+\section{در مورد این گزارش}
+شاید قبلا این تجربه را داشته‌اید که وقتی در یک پارکینگ زیرزمینی باشد و سیستم جهت‌یابی ، اما سیستم برای پیدا کردن شما به دلیل کیفیت پایین سیگنال که باعث آن دیوار‌های بتنی هستند، دچار مشکل می‌شود. برای بهبود دقت سیستم‌های مکان‌یابی داخلی، از ما خواسته شده تا مکان گوشی‌های هوشمند را بر اسا داده بلادرنگ سنسورها پیش‌بینی کنیم. هدف این گزارش آشنایی با داده و ساختن دو مدل \lr{Light GBM} برای پیش‌بینی موقعیت‌ها است.
+\section{بررسی اکتشافی داده}
+مجموعه داده شامل مسیر پیاده یک شخص از یک نقطه به نقطه دیگر می‌شود. در هنگام پیاده‌روی سیگنال‌های حسگر زیر ذخیره شده‌اند:
+\begin{latin}
+\begin{flushleft}
+\begin{itemize}
+\item
+accelerometer
+\item
+magnetic field
+\item
+gyroscope
+\item
+rotation vector
+\item
+Wifi
+\item
+Bluetooth iBeacon
+\item
+ground truths (waypoint locations)
+\end{itemize}
+\end{flushleft}
+\end{latin}
+اطلاعات اضافی در مورد داده را در صفحه گیت‌هاب زیر مشاهده می‌کنید:
+\begin{flushleft}
+	\href{https://github.com/location-competition/indoor-location-competition-20}{\lr{https://github.com/location-competition/indoor-location-competition-20}}
+\end{flushleft}
+\subsubsection*{بارگذاری کتاب‌خانه‌های مورد نیاز}
+\begin{latin}
+\begin{lstlisting}[language=Python]
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+
+from dataclasses import dataclass
+
+import matplotlib.pyplot as plt # visualization
+plt.rcParams.update({'font.size': 14})
+import seaborn as sns # visualization
+
+import warnings # Supress warnings 
+warnings.filterwarnings('ignore')
+
+from tqdm import tqdm
+
+import json
+import plotly.graph_objs as go
+from PIL import Image
+\end{lstlisting}
+\end{latin}
+بیایید ابتدا به یکی از فایل‌ نگاه کنیم تا داده را بهتر بشناسیم. متاسفانه، این بار راحتی کار با فرمت \lr{.csv} را نداریم. در عوض، ما به ما داده‌ متنی داده شده. فایل‌های متنی با یک سرتیتر آغاز شده و با یک پاورقی که حاوی بعضی اطلاعات می‌باشد ختم می‌شوند. سرتیتر و پاورقی خط‌های از فایل‌اند که با علامت (\lr{\#}) شروع می‌شوند. در میان این دو داده حسگر را داریم. داده حسگر با کاراکتر \lr{tab} جداگذاری شده است. هر سطر با یک \lr{timestamp} و به دنبال آن، اسم حسگر و مقادیر حسگر آمده است. \\
+برای برگرداندن داده، ما فایل را خط به خط خوانده و داده مرتبط یا مورد نیازمان را به آرایه مورد نظر اضافه می‌کنیم. در پایین می‌بینیم که هر آرایه شکل متفاوتی دارد. برای مثال؛ ما فقط شش نقطه داده برای \lr{waypoint} داریم، در حالی که ۱۷۴۳ نقطه داده از حسگر شتاب وجود دارد. 
+\begin{latin}
+\begin{lstlisting}[language=Python]
+@dataclass
+class ReadData:
+	acce: np.ndarray
+	acce_uncali: np.ndarray
+	gyro: np.ndarray
+	gyro_uncali: np.ndarray
+	magn: np.ndarray
+	magn_uncali: np.ndarray
+	ahrs: np.ndarray
+	wifi: np.ndarray
+	ibeacon: np.ndarray
+	waypoint: np.ndarray
+
+
+def read_data_file(data_filename):
+	acce = []
+	acce_uncali = []
+	gyro = []
+	gyro_uncali = []
+	magn = []
+	magn_uncali = []
+	ahrs = []
+	wifi = []
+	ibeacon = []
+	waypoint = []
+	
+	with open(data_filename, 'r', encoding='utf-8') as file:
+		lines = file.readlines()
+	
+	for line_data in lines:
+		line_data = line_data.strip()
+		if not line_data or line_data[0] == '#':
+			continue
+	
+		line_data = line_data.split('\t')
+	
+		if line_data[1] == 'TYPE_WAYPOINT':
+			waypoint.append([int(line_data[0]), float(line_data[2]), float(line_data[3])])
+			continue
+	
+		if line_data[1] == 'TYPE_ACCELEROMETER':
+			acce.append([int(line_data[0]), float(line_data[2]), float(line_data[3]), float(line_data[4])])
+			continue
+	
+		if line_data[1] == 'TYPE_ACCELEROMETER_UNCALIBRATED':
+			acce_uncali.append([int(line_data[0]), float(line_data[2]), float(line_data[3]), float(line_data[4])])
+			continue
+	
+		if line_data[1] == 'TYPE_GYROSCOPE':
+			gyro.append([int(line_data[0]), float(line_data[2]), float(line_data[3]), float(line_data[4])])
+			continue
+	
+		if line_data[1] == 'TYPE_GYROSCOPE_UNCALIBRATED':
+			gyro_uncali.append([int(line_data[0]), float(line_data[2]), float(line_data[3]), float(line_data[4])])
+			continue
+	
+		if line_data[1] == 'TYPE_MAGNETIC_FIELD':
+			magn.append([int(line_data[0]), float(line_data[2]), float(line_data[3]), float(line_data[4])])
+			continue
+	
+		if line_data[1] == 'TYPE_MAGNETIC_FIELD_UNCALIBRATED':
+			magn_uncali.append([int(line_data[0]), float(line_data[2]), float(line_data[3]), float(line_data[4])])
+			continue
+	
+		if line_data[1] == 'TYPE_ROTATION_VECTOR':
+			ahrs.append([int(line_data[0]), float(line_data[2]), float(line_data[3]), float(line_data[4])])
+			continue
+	
+		if line_data[1] == 'TYPE_WIFI':
+			sys_ts = line_data[0]
+			ssid = line_data[2]
+			bssid = line_data[3]
+			rssi = line_data[4]
+			lastseen_ts = line_data[6]
+			wifi_data = [sys_ts, ssid, bssid, rssi, lastseen_ts]
+			wifi.append(wifi_data)
+			continue
+	
+		if line_data[1] == 'TYPE_BEACON':
+			ts = line_data[0]
+			uuid = line_data[2]
+			major = line_data[3]
+			minor = line_data[4]
+			rssi = line_data[6]
+			ibeacon_data = [ts, '_'.join([uuid, major, minor]), rssi]
+			ibeacon.append(ibeacon_data)
+			continue
+	
+	
+	acce = np.array(acce)
+	acce_uncali = np.array(acce_uncali)
+	gyro = np.array(gyro)
+	gyro_uncali = np.array(gyro_uncali)
+	magn = np.array(magn)
+	magn_uncali = np.array(magn_uncali)
+	ahrs = np.array(ahrs)
+	wifi = np.array(wifi)
+	ibeacon = np.array(ibeacon)
+	waypoint = np.array(waypoint)
+	
+	return ReadData(acce, acce_uncali, gyro, gyro_uncali, magn, magn_uncali, ahrs, wifi, ibeacon, waypoint)
+
+sample_file = read_data_file("../input/indoor-location-navigation/train/5a0546857ecc773753327266/F2/5dccf516c04f060006e6e3c9.txt")
+
+print('acce shape:', sample_file.acce.shape)
+print('acce_uncali shape:', sample_file.acce_uncali.shape)
+print('gyro shape:', sample_file.gyro.shape)
+print('gyro_uncali shape:', sample_file.gyro_uncali.shape)
+print('magn shape:', sample_file.magn.shape)
+print('magn_uncali shape:',sample_file.magn_uncali.shape)
+print('ahrs shape:', sample_file.ahrs.shape)
+print('wifi shape:', sample_file.wifi.shape)
+print('ibeacon shape:', sample_file.ibeacon.shape)
+print('waypoint shape:', sample_file.waypoint.shape)
+\end{lstlisting}
+\end{latin}
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=\textwidth,height=4cm]{Outputs/3.png}
+\end{figure}
+\ \\
+\subsection*{\lr{Unix Timestamp}}
+ستون اول زمان یونیکس در میلی‌ثانیه است. به طور خلاصه، زمان یونیکس، مدتی است که از تاریخ \lr{00:00:00 UTC on 1 January 1970} گذشته است.\\
+در این نقطه مطمئن نیستیم آیا نیاز است، \lr{timestamp} را به فرم خوانده شدنی برای انسان در بیاوریم یا خیر. به‌هر رو، در پایین این تبدیل را مشاهده می‌کنید.
+\begin{latin}
+\begin{lstlisting}[language=Python]
+from datetime import datetime
+start_time = 1573713056850
+end_time = 1573713091483
+
+print(datetime.fromtimestamp(start_time/1000.0))
+print(datetime.fromtimestamp(end_time/1000.0))
+print(datetime.fromtimestamp(end_time/1000.0)-datetime.fromtimestamp(start_time/1000.0))
+\end{lstlisting}
+\end{latin}
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=\textwidth,height=2cm]{Outputs/4.png}
+\end{figure}
+\ \\
+\subsection*{\lr{Waypoint}}
+بیایید \lr{waypoint}-یا همان نقاطی که کاربر از روی آن عبور کرده-را روی نقشه ترسیم کنیم.
+\begin{latin}
+\begin{lstlisting}[language=Python]
+waypoint_df = pd.DataFrame(sample_file.waypoint)
+waypoint_df.columns = ['timestamp', 'waypoint_x','waypoint_y']
+display(waypoint_df.style.set_caption('Waypoint'))
+\end{lstlisting}
+\end{latin}
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=\textwidth,height=5cm]{Outputs/5.png}
+\end{figure}
+\ \\
+\begin{latin}
+\begin{lstlisting}[language=Python]
+def visualize_trajectory(trajectory, floor_plan_filename, width_meter, height_meter, title=None, mode='lines + markers + text', show=False):
+	"""
+	Copied from from https://github.com/location-competition/indoor-location-competition-20/blob/master/visualize_f.py
+	
+	"""
+	fig = go.Figure()	
+	# add trajectory
+	size_list = [6] * trajectory.shape[0]
+	size_list[0] = 10
+	size_list[-1] = 10
+
+	color_list = ['rgba(4, 174, 4, 0.5)'] * trajectory.shape[0]
+	color_list[0] = 'rgba(12, 5, 235, 1)'
+	color_list[-1] = 'rgba(235, 5, 5, 1)'
+
+	position_count = {}
+	text_list = []
+	for i in range(trajectory.shape[0]):
+		if str(trajectory[i]) in position_count:
+			position_count[str(trajectory[i])] += 1
+		else:
+			position_count[str(trajectory[i])] = 0
+		text_list.append('        ' * position_count[str(trajectory[i])] + f'{i}')
+	text_list[0] = 'Start 0'
+	text_list[-1] = f'End {trajectory.shape[0] - 1}'
+
+	fig.add_trace(
+		go.Scattergl(
+			x=trajectory[:, 0],
+			y=trajectory[:, 1],
+			mode=mode,
+			marker=dict(size=size_list, color=color_list),
+			line=dict(shape='linear', color='lightgrey', width=3, dash='dash'),
+			text=text_list,
+			textposition="top center",
+			name='trajectory',
+	))
+
+	# add floor plan
+	floor_plan = Image.open(floor_plan_filename)
+	fig.update_layout(images=[
+		go.layout.Image(
+			source=floor_plan,
+			xref="x",
+			yref="y",
+			x=0,
+			y=height_meter,
+			sizex=width_meter,
+			sizey=height_meter,
+			sizing="contain",
+			opacity=1,
+			layer="below",
+			)
+	])
+
+	# configure
+	fig.update_xaxes(autorange=False, range=[0, width_meter])
+	fig.update_yaxes(autorange=False, range=[0, height_meter], scaleanchor="x", scaleratio=1)
+	fig.update_layout(
+		title=go.layout.Title(
+			text=title or "No title.",
+			xref="paper",
+			x=0,
+		),
+		autosize=True,
+		width=800,
+		height=  800 * height_meter / width_meter,
+		template="plotly_white",
+	)
+
+	if show:
+		fig.show()
+
+	return fig
+
+def visualize_train_trajectory(path):
+	"""
+	Edited from 
+	https://www.kaggle.com/ihelon/indoor-location-exploratory-data-analysis
+	"""
+	_id, floor = path.split("/")[:2]
+	
+	train_floor_data = read_data_file(f"../input/indoor-location-navigation/train/{path}")
+	with open(f"../input/indoor-location-navigation/metadata/{_id}/{floor}/floor_info.json") as f:
+		train_floor_info = json.load(f)
+	
+	return visualize_trajectory(
+		train_floor_data.waypoint[:, 1:3], 
+		f"../input/indoor-location-navigation/metadata/{_id}/{floor}/floor_image.png",
+		train_floor_info["map_info"]["width"], 
+		train_floor_info["map_info"]["height"],
+		f"Visualization of {path}"
+	)
+#visualize_train_trajectory("5a0546857ecc773753327266/F2/5d8f094bd5bae80006eb8db0.txt")
+#visualize_train_trajectory("5a0546857ecc773753327266/F2/5d8f094bb6e29d0006fb8c03.txt")
+#visualize_train_trajectory("5a0546857ecc773753327266/F2/5dccf511c04f060006e6e3c6.txt")
+visualize_train_trajectory("5a0546857ecc773753327266/F2/5dccf516c04f060006e6e3c9.txt")
+\end{lstlisting}
+\end{latin}
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=\textwidth,height=10cm]{Outputs/6.png}
+\end{figure}
+\ \\
+\subsection*{\lr{Inertial Measurement Unit (IMU)}}
+\lr{IMU}
+ یک حسگر است که نیرو، نرخ زاویه‌ای و جهت بدن-در اینجا گوشی هوشمند است-را اندازه‌گیری می‌کند. این مقادیر با استفاده از شتاب‌سنج، ژیروسکوپ و در این نمونه مغناطیس‌سنج نیز به دست آمده است.
+\begin{flushleft}
+\begin{latin}
+\begin{enumerate}
+	\item
+	\textbf{Accelerometer:} Measures change in velocity (m/s\^2)
+	\item
+	\textbf{Gyroscopes:} Measures change in rotation (rad/s)
+	\item 
+	\textbf{Accelerometer:} Measures magnetic field (μT)
+\end{enumerate}
+\end{latin}
+\end{flushleft}
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=\textwidth,height=10cm]{Outputs/i1.png}
+\end{figure}
+\ \\
+داده حسگر \lr{IMU} در بیشتر مسیر‌ها، دارای شکل مشابه است. می‌توان این مسیر‌های مشابه را در یک دیتافریم \lr{pandas} ذخیره کرده و مشاهده کنیم.
+\begin{latin}
+\begin{lstlisting}[language=Python]
+temp = np.concatenate([sample_file.acce, 
+sample_file.acce_uncali[:, 1:],
+sample_file.gyro[:, 1:],
+sample_file.gyro_uncali[:, 1:],
+sample_file.magn[:, 1:],
+sample_file.magn_uncali[:, 1:],
+sample_file.ahrs[:, 1:],
+], axis=1)
+
+imu_df = pd.DataFrame(temp)
+
+imu_df.columns = ['timestamp', 'acce_x','acce_y', 'acce_z','acce_uncali_x','acce_uncali_y', 'acce_uncali_z',
+'gyro_x','gyro_y', 'gyro_z','gyro_uncali_x','gyro_uncali_y', 'gyro_uncali_z',
+'magn_x','magn_y', 'magn_z','magn_uncali_x','magn_uncali_y', 'magn_uncali_z',
+'ahrs_x','ahrs_y', 'ahrs_z']
+
+display(imu_df.head(8).style.set_caption('IMU Data'))
+\end{lstlisting}
+\end{latin}
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=\textwidth,height=4cm]{Outputs/7.png}
+\end{figure}
+\ \\
+بیایید ابتدا به \textbf{شتاب} نگاه بی‌اندازیم:
+\begin{latin}
+\begin{lstlisting}[language=Python]
+def plot_imu_signals(col, uncali = True):
+	fig, ax = plt.subplots(nrows=3, ncols=1, figsize=(14, 9))
+	ax[0].set_ylabel(f"{col}_x")
+	ax[1].set_ylabel(f"{col}_y")
+	ax[2].set_ylabel(f"{col}_z")
+	if uncali:
+		sns.lineplot(x=imu_df.timestamp, y=imu_df[f"{col}_uncali_x"], ax=ax[0], label = 'uncali', color='orange')
+		sns.lineplot(x=imu_df.timestamp, y=imu_df[f"{col}_uncali_y"], ax=ax[1], label = 'uncali', color='orange')
+		sns.lineplot(x=imu_df.timestamp, y=imu_df[f"{col}_uncali_z"], ax=ax[2], label = 'uncali', color='orange')
+		ax[0].set_ylabel(f"{col}_x \n(calib./uncalib.)")
+		ax[1].set_ylabel(f"{col}_y \n(calib./uncalib.)")
+		ax[2].set_ylabel(f"{col}_z \n(calib./uncalib.)")
+		
+		sns.lineplot(x=imu_df.timestamp, y=imu_df[f"{col}_x"], ax=ax[0], label='cali', color='cornflowerblue')
+		sns.lineplot(x=imu_df.timestamp, y=imu_df[f"{col}_y"], ax=ax[1], label='cali', color='cornflowerblue')
+		sns.lineplot(x=imu_df.timestamp, y=imu_df[f"{col}_z"], ax=ax[2], label='cali', color='cornflowerblue')
+
+	for i in range(3):
+		ax[i].set_xlim([start_time, end_time])
+	plt.tight_layout()
+	plt.show()
+
+plot_imu_signals('acce')
+\end{lstlisting}
+\end{latin}
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=\textwidth,height=8cm]{Outputs/8.png}
+\end{figure}
+\ \\
+اولین نکته این است که مقدار میانگین \lr{acce\_z} شبیه به مقدار جاذبه استاندارد (\lr{g = 9.80m/s\^2}) است. متقابلا در تصویر بالا، گوشی هوشمند به طور افقی نسبت به بدن نقشه‌برداران قرار داشته؛ به همین دلیل مقدار \lr{z-axis} با مقدار \lr{g} مطابقت دارد.
+\begin{latin}
+\begin{lstlisting}[language=Python]
+imu_df.acce_z.mean()
+\end{lstlisting}
+\end{latin}
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=\textwidth,height=1cm]{Outputs/9.png}
+\end{figure}
+\ \\
+اگر چه توانستیم در نمونه بالا ببینیم که توابع درست کار کرده‌اند، اما داده \lr{waypoint} و داده \lr{acce} به هم نمی‌خورند. نویز می‌تواند باعث این ناهم‌خوانی شده باشد. با ادغام روی شتاب، ما همچنین خطا برای هر نمونه را نیز ادغام خواهیم کرد که می‌تواند به سرعت موجب انحرافات (\lr{deviation}) بزرگ شود.
+\begin{latin}
+\begin{lstlisting}[language=Python]
+def calc_from_pos(timestamp, pos):
+	df = pd.DataFrame({'timestamp' : timestamp, 'position' : pos})
+	df['timestamp_ms'] = df['timestamp'].apply(lambda x: datetime.fromtimestamp(x/1000.0))
+	df['timedelta_ms'] = df['timestamp_ms'].diff()
+	df['timedelta_s'] = df['timedelta_ms'].apply(lambda x: x.total_seconds()).fillna(0)
+	df['velocity'] = (df['position'].diff() / df['timedelta_s']).fillna(0)
+	df['acceleration'] = (df['velocity'].diff() / df['timedelta_s']).fillna(0)
+	
+	return df[['timestamp', 'timestamp_ms', 'timedelta_s', 'position', 'velocity', 'acceleration']]
+
+def calc_from_acce(timestamp, acce, p_0):
+	df = pd.DataFrame({'timestamp' : timestamp, 'acceleration' : acce})
+	df['timestamp_ms'] = df['timestamp'].apply(lambda x: datetime.fromtimestamp(x/1000.0))
+	df['timedelta_ms'] = df['timestamp_ms'].diff()
+	df['timedelta_s'] = df['timedelta_ms'].apply(lambda x: x.total_seconds()).fillna(0)
+	df['velocity'] = (df['acceleration']*df['timedelta_s']).cumsum()
+	df['position'] = p_0 + (df['velocity']*df['timedelta_s']).cumsum()
+	
+	return df[['timestamp', 'timestamp_ms', 'timedelta_s', 'position', 'velocity', 'acceleration']]
+
+a_df = calc_from_acce(pd.Series([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]) * 1000 + start_time, 
+pd.Series([0, 0, 1.2, 1.2, 1.2, 0, 0, 0, -1.2, -1.2, -1.2, 0, 0]), -6)
+display(a_df.style.set_caption('Calculated Position and Velocity from Acceleration'))
+
+b_df = calc_from_pos(a_df.timestamp, a_df.position)
+display(b_df.style.set_caption('Calculated Acceleration and Velocity from Position'))
+
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14, 6))
+sns.lineplot(x=a_df.timestamp, y=a_df.position, ax=ax, color='cornflowerblue', marker='o', label='Position ($m$)')
+sns.lineplot(x=a_df.timestamp, y=a_df.velocity, ax=ax, color='blue', marker='o', label='Velocity ($m/s$)')
+sns.lineplot(x=a_df.timestamp, y=a_df.acceleration, ax=ax, color='seagreen', marker='o', label='Acceleration ($m/s^2$)')
+
+plt.show()		
+\end{lstlisting}
+\end{latin}
+\pagebreak
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=\textwidth,height=12cm]{Outputs/10_1.png}
+\end{figure}
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=\textwidth,height=6cm]{Outputs/10_2.png}
+\end{figure}
+\ \\
+\subsection*{\lr{WiFi}}
+\begin{flushleft}
+	\begin{latin}
+		\begin{enumerate}
+			\item
+			\textbf{Service set ID (SSID):} name identifier for wireless networks (can be changed)
+			\item
+			\textbf{Basic Service Set ID (BSSID):} MAC address of the access point (cannot be changed)
+			\item 
+			\textbf{Received signal strength indication (RSSI)}
+		\end{enumerate}
+	\end{latin}
+\end{flushleft}
+\begin{latin}
+\begin{lstlisting}[language=Python]
+wifi_df = pd.DataFrame(sample_file.wifi)
+wifi_df.columns = ['timestamp', 'ssid', 'bssid', 'rssi', 'last_seen_timestamp']
+wifi_df = wifi_df.pivot(index='timestamp', columns=['ssid', 'bssid'])['rssi']
+wifi_df.reset_index(drop=False, inplace=True)
+wifi_df.style.set_caption('WiFi')
+\end{lstlisting}
+\end{latin}
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=\textwidth,height=8cm]{Outputs/16.png}
+\end{figure}
+\begin{latin}
+\begin{lstlisting}[language=Python]
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(20, 8))
+
+for i, c in enumerate(wifi_df.columns):
+if c != ('timestamp', ''):
+sns.lineplot(x=wifi_df.timestamp.astype(int), y=wifi_df[c].replace('NaN', np.nan).astype(float), ax=ax, marker='o', label=c)
+if i == 8:
+break
+ax.set_xlim([start_time, end_time])
+ax.set_ylim([-80, 0])
+
+ax.set_ylabel('RSSI')
+ax.set_title('8 Sample RSSI')
+plt.show()
+\end{lstlisting}
+\end{latin}
+\begin{figure}[hbt!]
+\centering
+\includegraphics[width=\textwidth,height=10cm]{Outputs/17.png}
+\end{figure}
+\ \\
+\section{راه حل}
+\subsection*{\lr{Gradient Boosting}}
+\lr{Gradient boosting}
+ روشی است که با تکرار یک حلقه مدل‌هایی را به یک گروه اضافه می‌کند. با مقداردهی اولیه گروه با یک مدل شروع به کار می‌کند، که پیش‌بینی‌های آن می‌تواند بسیار ساده باشد. (حتی اگر پیش‌بینی‌ها به طور کلی غیر دقیق باشد، اضافه کردن به گروه از خطا خواهد کاست.)
+ سپس حلقه را آغاز می‌کنیم:
+\begin{itemize}
+\item
+ابتدا، ما از گروه فعلی برای تولید پیش‌بینی برای هر مشاهده در مجموعه‌داده استفاده می‌کنیم. برای انجام پیش‌بینی، ما پیش‌بینی‌های همه مدل‌‌ها را به گروه اضافه می‌کنیم.
+\item
+این پیش‌بینی‌ها برای محاسبه \lr{loss function} استفاده خواهند شد. (برای نمونه: \lr{MSE}).
+\item
+سپس، ما از تابع هدررفتگی برای فیت کردن یک مدل جدید که به گروه اضافه خواهد شد استفاده می‌کنیم. مشخصا، ما پارامترهای مدل را طوری تعیین می‌کنیم که اضافه کردن‌اش به گروه باعث کم شدن هدررفتگی شود. (نکته: کلمه \lr{gradient} در \lr{gradient boosting} اشاره به این دارد که ما \lr{gradient descent} را روی تابع هدررفتگی اعمال می‌کنیم که پارامترهای مدل جدید تعیین شود.)
+\item
+در نهایت، ما مدل جدید را به گروه اضافه می‌کنیم
+\item
+تکرار
+\end{itemize}
+\begin{figure}[hbt!]
+	\centering
+	\includegraphics[width=\textwidth,height=4cm]{Outputs/s1.png}
+\end{figure}
+\ \\
+ما از \lr{LightGBM} که یک فریم‌ورک \lr{gradient boosting} می‌باشد بهره می‌بریم. این فریم‌ورک طراحی شده تا توزیع شده و کارآمد باشد و از مزایای زیر برخوردار است:
+\begin{flushleft}
+\begin{latin}
+\begin{itemize}
+\item
+Faster training speed and higher efficiency
+\item
+Lower memory usage
+\item 
+Better accuracy
+\item
+Support of parallel and GPU learning
+\item
+Capable of handling large-scale data
+\end{itemize}
+\end{latin}
+\end{flushleft}
+\section{مدل‌سازی}
+\subsection*{کتاب‌خانه‌های مورد نیاز برای مدل‌سازی و ارزیابی مدل‌ها}
+\begin{latin}
+\begin{lstlisting}[language=Python]
+import numpy as np
+import pandas as pd
+import scipy.stats as stats
+from pathlib import Path
+import glob
+
+from sklearn.model_selection import KFold
+import lightgbm as lgb
+
+import psutil
+import random
+import os
+import time
+import sys
+import math
+from contextlib import contextmanager
+# -------------------------------------------------
+# Fixed values
+# -------------------------------------------------
+N_SPLITS = 10
+SEED = 42
+
+# -------------------------------------------------
+# File path definition
+# -------------------------------------------------
+LOG_PATH = Path("./log/")
+LOG_PATH.mkdir(parents=True, exist_ok=True)
+\end{lstlisting}
+\end{latin}
+\subsection*{توابع مورد نیاز}
+\begin{latin}
+\begin{lstlisting}[language=Python]
+# --------------------------------------------------------
+# Utilities
+# --------------------------------------------------------
+@contextmanager
+def timer(name: str):
+	t0 = time.time()
+	p = psutil.Process(os.getpid())
+	m0 = p.memory_info()[0] / 2. ** 30
+	try:
+		yield
+	finally:
+		m1 = p.memory_info()[0] / 2. ** 30
+		delta = m1 - m0
+		sign = '+' if delta >= 0 else '-'
+		delta = math.fabs(delta)
+		print(f"[{m1:.1f}GB({sign}{delta:.1f}GB): {time.time() - t0:.3f}sec] {name}", file=sys.stderr)
+
+
+def set_seed(seed=42):
+	random.seed(seed)
+	os.environ["PYTHONHASHSEED"] = str(seed)
+	np.random.seed(seed)
+
+
+def comp_metric(xhat, yhat, fhat, x, y, f):
+	intermediate = np.sqrt(np.power(xhat-x, 2) + np.power(yhat-y, 2)) + 15 * np.abs(fhat-f)
+	return intermediate.sum()/xhat.shape[0]
+
+
+def score_log(df: pd.DataFrame, num_files: int, nam_file: str, data_shape: tuple, n_fold: int, seed: int, mpe: float):
+	score_dict = {'n_files': num_files, 'file_name': nam_file, 'shape': data_shape, 'fold': n_fold, 'seed': seed, 'score': mpe}
+	# noinspection PyTypeChecker
+	df = pd.concat([df, pd.DataFrame.from_dict([score_dict])])
+	df.to_csv(LOG_PATH / f"log_score.csv", index=False)
+	return df
+\end{lstlisting}
+\end{latin}
+\subsection*{\lr{Set seed}}
+\begin{latin}
+\begin{lstlisting}[language=Python]
+set_seed(SEED)
+\end{lstlisting}
+\end{latin}
+\subsection*{خواندن داده}
+\begin{latin}
+\begin{lstlisting}[language=Python]
+feature_dir = "../input/indoor-navigation-and-location-wifi-features"
+train_files = sorted(glob.glob(os.path.join(feature_dir, '*_train.csv')))
+test_files = sorted(glob.glob(os.path.join(feature_dir, '*_test.csv')))
+subm = pd.read_csv('../input/indoor-location-navigation/sample_submission.csv', index_col=0)
+\end{lstlisting}
+\end{latin}
+\subsection*{تعریف کردن پارامترهای \lr{lightgbm}}
+\begin{latin}
+\begin{lstlisting}[language=Python]
+# --------------------------------------------
+# Define parameters for models
+# --------------------------------------------
+lgb_params = {'objective': 'root_mean_squared_error',
+	'boosting_type': 'gbdt',
+	'n_estimators': 50000,
+	'learning_rate': 0.1,
+	'num_leaves': 90,
+	'colsample_bytree': 0.4,
+	'subsample': 0.6,
+	'subsample_freq': 2,
+	'bagging_seed': SEED,
+	'reg_alpha': 8,
+	'reg_lambda': 2,
+	'random_state': SEED,
+	'n_jobs': -1
+}
+
+lgb_f_params = {'objective': 'multiclass',
+	'boosting_type': 'gbdt',
+	'n_estimators': 50000,
+	'learning_rate': 0.1,
+	'num_leaves': 90,
+	'colsample_bytree': 0.4,
+	'subsample': 0.6,
+	'subsample_freq': 2,
+	'bagging_seed': SEED,
+	'reg_alpha': 8,
+	'reg_lambda': 2,
+	'random_state': SEED,
+	'n_jobs': -1
+}
+\end{lstlisting}
+\end{latin}
+\subsection*{آموزش دادن بر اساس \lr{k-fold validation} و پیش‌بینی موقعیت‌ها}
+\begin{latin}
+\begin{lstlisting}[language=Python]
+# ---------------------------------------------
+# Training and inference
+# ---------------------------------------------
+score_df = pd.DataFrame()
+oof = list()
+predictions = list()
+for n_files, file in enumerate(train_files):
+	data = pd.read_csv(file, index_col=0)
+	test_data = pd.read_csv(test_files[n_files], index_col=0)
+
+	oof_x, oof_y, oof_f = np.zeros(data.shape[0]), np.zeros(data.shape[0]), np.zeros(data.shape[0])
+	preds_x, preds_y = 0, 0
+	preds_f_arr = np.zeros((test_data.shape[0], N_SPLITS))
+
+	kf = KFold(n_splits=N_SPLITS, shuffle=True, random_state=SEED)
+	for fold, (trn_idx, val_idx) in enumerate(kf.split(data.iloc[:, :-4])):
+		X_train = data.iloc[trn_idx, :-4]
+		y_trainx = data.iloc[trn_idx, -4]
+		y_trainy = data.iloc[trn_idx, -3]
+		y_trainf = data.iloc[trn_idx, -2]
+
+		X_valid = data.iloc[val_idx, :-4]
+		y_validx = data.iloc[val_idx, -4]
+		y_validy = data.iloc[val_idx, -3]
+		y_validf = data.iloc[val_idx, -2]
+
+		modelx = lgb.LGBMRegressor(**lgb_params)
+		with timer("fit X"):
+			modelx.fit(X_train, y_trainx,
+						eval_set=[(X_valid, y_validx)],
+						eval_metric='rmse',
+						verbose=False,
+						early_stopping_rounds=20
+						)
+
+		modely = lgb.LGBMRegressor(**lgb_params)
+		with timer("fit Y"):
+			modely.fit(X_train, y_trainy,
+						eval_set=[(X_valid, y_validy)],
+						eval_metric='rmse',
+						verbose=False,
+						early_stopping_rounds=20
+						)
+
+		modelf = lgb.LGBMClassifier(**lgb_f_params)
+		with timer("fit F"):
+			modelf.fit(X_train, y_trainf,
+						eval_set=[(X_valid, y_validf)],
+						eval_metric='multi_logloss',
+						verbose=False,
+						early_stopping_rounds=20
+						)
+
+		oof_x[val_idx] = modelx.predict(X_valid)
+		oof_y[val_idx] = modely.predict(X_valid)
+		oof_f[val_idx] = modelf.predict(X_valid).astype(int)
+		
+		preds_x += modelx.predict(test_data.iloc[:, :-1]) / N_SPLITS
+		preds_y += modely.predict(test_data.iloc[:, :-1]) / N_SPLITS
+		preds_f_arr[:, fold] = modelf.predict(test_data.iloc[:, :-1]).astype(int)
+		
+		score = comp_metric(oof_x[val_idx], oof_y[val_idx], oof_f[val_idx],
+		y_validx.to_numpy(), y_validy.to_numpy(), y_validf.to_numpy())
+		print(f"fold {fold}: mean position error {score}")
+		score_df = score_log(score_df, n_files, os.path.basename(file), data.shape, fold, SEED, score)
+
+	print("*+"*40)
+	print(f"file #{n_files}, shape={data.shape}, name={os.path.basename(file)}")
+	score = comp_metric(oof_x, oof_y, oof_f,
+	data.iloc[:, -4].to_numpy(), data.iloc[:, -3].to_numpy(), data.iloc[:, -2].to_numpy())
+	oof.append(score)
+	print(f"mean position error {score}")
+	print("*+"*40)
+	score_df = score_log(score_df, n_files, os.path.basename(file), data.shape, 999, SEED, score)
+
+	preds_f_mode = stats.mode(preds_f_arr, axis=1)
+	preds_f = preds_f_mode[0].astype(int).reshape(-1)
+	test_preds = pd.DataFrame(np.stack((preds_f, preds_x, preds_y))).T
+	test_preds.columns = subm.columns
+	test_preds.index = test_data["site_path_timestamp"]
+	test_preds["floor"] = test_preds["floor"].astype(int)
+	predictions.append(test_preds)
+\end{lstlisting}
+\end{latin}
+\begin{flushleft}
+	\begin{latin}
+		\begin{thebibliography}{9}
+			\bibitem{knuthwebsite} 
+			\href{https://www.kaggle.com/ihelon/indoor-location-exploratory-data-analysis}{Indoor Location - Exploratory Data Analysis}
+			
+			\bibitem{knuthwebsite} 
+			\href{https://www.kaggle.com/hiro5299834/wifi-features-with-lightgbm-and-xgboost-kfold}{wifi features with lightgbm and xgboost/KFold}
+			
+			\bibitem{knuthwebsite} 
+			\href{https://www.kaggle.com/titericz/eda-loading-data-and-visualizing-paths}{EDA - Loading Data and Visualizing Paths}
+		\end{thebibliography}
+	\end{latin}
+\end{flushleft}
+
+\end{document}
